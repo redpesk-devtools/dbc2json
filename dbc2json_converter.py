@@ -54,18 +54,22 @@ messages_dict = {"messages" : {}}
 
 # the main method expect on argument which is the input-file as ".dbc"
 def main(argv):
+    mode = False
     inputfile = ''
     try:
-        opts, args = getopt.getopt(argv,"hi:o:",["ifile=", "ofile="])
+        opts, args = getopt.getopt(argv,"hi:w",["ifile=", "mode="])
     except getopt.GetoptError:
-        print ('test.py -i <inputfile>')
+        print ('test.py -i <inputfile> -m <writeable(true|false)')
         sys.exit(2)
     for opt, arg in opts:
         if opt == '-h':
-            print ('test.py -i <inputfile>')
+            print ('test.py -i <inputfile> -m <writeable(true|false)>')
             sys.exit()
         elif opt in ("-i", "--ifile"):
             inputfile = arg
+        elif opt in ("-w", "--writeable"):
+            mode = True
+            print (mode)
     # load the can database file in cantools to work on the db
     db = cantools.database.load_file(inputfile)
     # load the messages to iterate over them altough print number of lines as output
@@ -140,7 +144,7 @@ def main(argv):
             # { "generic_name" : signal.name, "bit_position" : signal.start, "bit_size" : signal.length, "factor" : signal.scale, "offset" : signal.offset }
             # it is just a subset and not complete 
             # after the creation it will be pushed in the messages:messages:signal
-            signal_json = { "generic_name" : signal.name, "bit_position" : signal.start, "bit_size" : signal.length, "factor" : signal.scale, "offset" : signal.offset }
+            signal_json = { "generic_name" : signal.name, "bit_position" : signal.start, "bit_size" : signal.length, "factor" : signal.scale, "offset" : signal.offset, "writeable" : mode }
             signal_dict[signal.name] = signal_json
 
 
