@@ -11,36 +11,9 @@ import cantools
 from pprint import pprint
 import json 
 
-# plain coded data header for AGL 
-data_header = {
-     "name": "example", 
-     "version": "2.0",
-     "extra_sources": [
-        "handlers.cpp"
-    ],
-    "initializers": [
-        "initializeMyStuff"
-    ],
-    "loopers": [
-        "myLooper"
-    ],
-    "buses": {
-        "hs": {
-            "controller": 1,
-            "speed": 500000
-        },
-        "ms": {
-            "controller": 2,
-            "speed": 125000
-        }
-    },
-    "commands": [
-        { "name": "turn_signal_status",
-            "handler": "handleTurnSignalCommand"
-        }
-    ]
-
-}
+# plain coded data header for AGL as json-file, needs a proper file like example_header.json 
+with open('header.json') as json_file:
+    data_header = json.load(json_file)
 
 # dictonary for the messages starting with messages prepared to add new messages in that
 
@@ -52,21 +25,24 @@ messages_dict = {"messages" : {}}
 #print("---------------------------------------------------")
 
 
-# the main method expect on argument which is the input-file as ".dbc"
+# the main method expect on argument which is the input-file as ".dbc", a parameter for the bus and the mode
 def main(argv):
     mode = False
     inputfile = ''
+    bus = ''
     try:
-        opts, args = getopt.getopt(argv,"hi:w",["ifile=", "mode="])
+        opts, args = getopt.getopt(argv,"hi:b:w",["ifile=", "bus=", "mode="])
     except getopt.GetoptError:
-        print ('test.py -i <inputfile> -m <writeable(true|false)')
-        sys.exit(2)
+        print ('dbc2json.py -i <inputfile> -m <writeable(true|false) -b <canbus>')
+        sys.exit(1)
     for opt, arg in opts:
         if opt == '-h':
-            print ('test.py -i <inputfile> -m <writeable(true|false)>')
+            print ('dbc2json.py -i <inputfile> -m <writeable(true|false)> -b <canbus>')
             sys.exit()
         elif opt in ("-i", "--ifile"):
             inputfile = arg
+        elif opt in ("-b", "--bus"):
+            bus = arg
         elif opt in ("-w", "--writeable"):
             mode = True
             print (mode)
@@ -105,7 +81,7 @@ def main(argv):
 
         # the message is built by the informations through cantools conversion the hex-string will be used as message id , the message_json will be saved in messages_dict
         # working object signal_dict will be created to work later on, singals object with all signals in that messages is created
-        message_json =  { "name" : message.name, "bus" : message.bus_name, "is_fd": False, "is_j1939" : False, "is_extended" : message.is_extended_frame, "signals" : {}}
+        message_json =  { "name" : message.name, "bus" : bus, "is_fd": False, "is_j1939" : False, "is_extended" : message.is_extended_frame, "signals" : {}}
         hex_value = str(hex(message.frame_id))
         messages_dict["messages"][hex_value] = message_json
         signal_dict = messages_dict["messages"][hex_value]["signals"]
