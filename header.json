@@ -1,1 +1,1 @@
-{"name": "example", "version": "2.0", "extra_sources": [], "initializers": [], "loopers": [], "buses": {"hs": {"controller": "vcan0", "speed": 500000}, "ls": {"controller": "slcan0", "speed": 125000}}, "commands": [{"name": "turn_signal_status", "handler": "handleTurnSignalCommand"}]}
+{"name": "example", "version": "2.0", "extra_sources": [], "initializers": [], "loopers": [], "buses": {"hs": {"controller": 0, "speed": 500000}, "ls": {"controller": 1, "speed": 125000}}, "commands": [{"name": "turn_signal_status", "handler": "handleTurnSignalCommand"}]}
