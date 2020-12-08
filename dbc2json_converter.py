@@ -120,7 +120,7 @@ def main(argv):
             # { "generic_name" : signal.name, "bit_position" : signal.start, "bit_size" : signal.length, "factor" : signal.scale, "offset" : signal.offset }
             # it is just a subset and not complete 
             # after the creation it will be pushed in the messages:messages:signal
-            signal_json = { "generic_name" : signal.name, "bit_position" : signal.start, "bit_size" : signal.length, "factor" : signal.scale, "offset" : signal.offset, "writeable" : mode }
+            signal_json = { "generic_name" : signal.name, "bit_position" : signal.start, "bit_size" : signal.length, "factor" : signal.scale, "offset" : signal.offset, "writable" : mode }
             signal_dict[signal.name] = signal_json
 
 
