@@ -103,8 +103,15 @@ def main(argv):
                 "offset": signal.offset,
                 "writable": mode
             }
+            if signal.unit != None:
+                signal_json["unit"] = signal.unit
+            if signal.minimum != None:
+                signal_json["min_value"] = signal.minimum
+            if signal.maximum != None:
+                signal_json["max_value"] = signal.maximum
             signal_dict[signal.name] = signal_json
             if signal.byte_order == "big_endian":
+                # WARNING: DEPENDING ON CAN FRAMES SENT BY THE DEVICE
                 message_json["byte_frame_is_big_endian"] = True
                 message_json["bit_position_reversed"] = True
 
