@@ -17,14 +17,17 @@ with open('header.json') as json_file:
 messages_dict = {"messages" : {}}
 
 def usage():
-    usage = """dbc2json.py [ -i | --in ] [ -o | --out ] [ -v | --version ] [ -b | --bus ] [ -m | --mode ] [ -j | --j1939 ] [ -f | --fd ] [ -h | --help ]
+    usage = """dbc2json.py [ -i | --in ] [ -o | --out ] [ -v | --version ] [ -b | --bus ] [ -m | --mode ] [ -j | --j1939 ] [ -f | --fd ] [ -r | --reversed ] [ -e | --big-endian ] [ -l | --little-endian ] [ -h | --help ]
     - in: input file (.dbc) [MANDATORY]
     - out: output file (.json)
     - version: signals version
     - bus: bus name
     - mode: signal is writeable
     - j1939: signals used j1939
-    - fd: signals used FD"""
+    - fd: signals used FD
+    - reversed: bits position are reversed
+    - big-endian: bytes position are reversed
+    - little-endian: self-explanatory"""
     error(usage)
     sys.exit(1)
 
@@ -42,9 +45,12 @@ def main(argv):
     bus = None
     mode = False
     j1939 = False
-    fd=False
+    fd = False
+    rev = False
+    bigE = False
+    litE = False
     try:
-        opts, args = getopt.getopt(argv,"i:o:v:b:wjfh",["in", "out", "version", "bus", "mode", "j1939", "fd", "help"])
+        opts, args = getopt.getopt(argv,"i:o:v:b:wjfrelh",["in", "out", "version", "bus", "mode", "j1939", "fd", "reversed", "big-endian", "little-endian", "help"])
     except getopt.GetoptError:
         usage()
     for opt, arg in opts:
@@ -64,14 +70,23 @@ def main(argv):
             j1939 = True
         elif opt in ("-f", "--fd"):
             fd = True
+        elif opt in ("-r", "--reversed"):
+            rev = True
+        elif opt in ("-e", "--big-endian"):
+            bigE = True
+        elif opt in ("-l", "--little-endian"):
+            litE = True
+        
     if not inputfile:
         usage()
     if not inputfile.endswith(".dbc"):
-        error("Wrong input file type (must be .dbc)")
+        error("wrong input file type (must be .dbc)")
     if not outputfile:
         outputfile="{}.json".format(os.path.splitext(os.path.basename(inputfile))[0])
     if not bus:
         bus = "hs"
+    if bigE and litE:
+        error("little and big endian flag can't be used together")
     data_header["name"] = os.path.splitext(os.path.basename(inputfile))[0]
     data_header["version"] = version
     db = cantools.database.load_file(inputfile)
@@ -84,8 +99,8 @@ def main(argv):
             "is_fd": fd,
             "is_j1939": j1939,
             "is_extended": message.is_extended_frame,
-            "byte_frame_is_big_endian": False,
-            "bit_position_reversed": False,
+            "byte_frame_is_big_endian": bigE,
+            "bit_position_reversed": rev,
             "signals" : {}
         }
         hex_value = str(hex(message.frame_id))
@@ -110,10 +125,8 @@ def main(argv):
             if signal.maximum != None:
                 signal_json["max_value"] = signal.maximum
             signal_dict[signal.name] = signal_json
-            if signal.byte_order == "big_endian":
-                # WARNING: DEPENDING ON CAN FRAMES SENT BY THE DEVICE
+            if not litE and not bigE and signal.byte_order == "big_endian":
                 message_json["byte_frame_is_big_endian"] = True
-                message_json["bit_position_reversed"] = True
 
     output_all = data_header 
     output_all.update(messages_dict)
