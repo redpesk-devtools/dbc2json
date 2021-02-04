@@ -11,15 +11,16 @@ import cantools
 from pprint import pprint
 import json 
 
-with open('header.json') as json_file:
+with open("{}/header.json".format(os.path.dirname(os.path.realpath(__file__)))) as json_file:
     data_header = json.load(json_file)
 
 messages_dict = {"messages" : {}}
 
 def usage():
-    usage = """dbc2json.py [ -i | --in ] [ -o | --out ] [ -v | --version ] [ -b | --bus ] [ -m | --mode ] [ -j | --j1939 ] [ -f | --fd ] [ -r | --reversed ] [ -e | --big-endian ] [ -l | --little-endian ] [ -h | --help ]
+    usage = """dbc2json.py [ -i | --in ] [ -o | --out ] [ -v | --version ] [ -p || --prefix ] [ -b | --bus ] [ -m | --mode ] [ -j | --j1939 ] [ -f | --fd ] [ -r | --reversed ] [ -e | --big-endian ] [ -l | --little-endian ] [ -h | --help ]
     - in: input file (.dbc) [MANDATORY]
     - out: output file (.json)
+    - prefix: message's name prefix
     - version: signals version
     - bus: bus name
     - mode: signal is writeable
@@ -29,7 +30,6 @@ def usage():
     - big-endian: bytes position are reversed
     - little-endian: self-explanatory"""
     error(usage)
-    sys.exit(1)
 
 def error(err: str):
     print(err)
@@ -41,6 +41,7 @@ def formatName(name: str):
 def main(argv):
     inputfile = None
     outputfile = None
+    prefix = None
     version = 0.0
     bus = None
     mode = False
@@ -50,7 +51,7 @@ def main(argv):
     bigE = False
     litE = False
     try:
-        opts, args = getopt.getopt(argv,"i:o:v:b:wjfrelh",["in", "out", "version", "bus", "mode", "j1939", "fd", "reversed", "big-endian", "little-endian", "help"])
+        opts, args = getopt.getopt(argv,"i:o:p:v:b:wjfrelh",["in", "out", "prefix", "version", "bus", "mode", "j1939", "fd", "reversed", "big-endian", "little-endian", "help"])
     except getopt.GetoptError:
         usage()
     for opt, arg in opts:
@@ -60,6 +61,8 @@ def main(argv):
             inputfile = arg.strip()
         elif opt in ("-o", "--out"):
             out = arg.strip()
+        elif opt in ("-p", "--prefix"):
+            prefix = arg.strip()
         elif opt in ("-v", "--version"):
             version = arg.strip()
         elif opt in ("-b", "--bus"):
@@ -90,8 +93,9 @@ def main(argv):
     data_header["name"] = os.path.splitext(os.path.basename(inputfile))[0]
     data_header["version"] = version
     db = cantools.database.load_file(inputfile)
-    print("Number of messages " +str(len(db.messages)))
     for message in db.messages:
+        if prefix:
+            message.name = "{}.{}".format(prefix, message.name)
         message_json = {
             "name" : formatName(message.name),
             "bus" : bus,
