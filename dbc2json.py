@@ -60,7 +60,7 @@ def main(argv):
         elif opt in ("-i", "--in"):
             inputfile = arg.strip()
         elif opt in ("-o", "--out"):
-            out = arg.strip()
+            outputfile = arg.strip()
         elif opt in ("-p", "--prefix"):
             prefix = arg.strip()
         elif opt in ("-v", "--version"):
