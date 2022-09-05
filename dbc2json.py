@@ -120,6 +120,7 @@ def main(argv):
                 "bit_size": signal.length,
                 "factor": signal.scale,
                 "offset": signal.offset,
+                "byte_order": signal.byte_order,
                 "writable": mode
             }
             if signal.unit != None:
