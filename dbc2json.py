@@ -42,7 +42,7 @@ def main(argv):
     inputfile = None
     outputfile = None
     prefix = None
-    version = 0.0
+    version = "0.0"
     bus = None
     mode = False
     j1939 = False
