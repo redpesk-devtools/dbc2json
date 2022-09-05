@@ -84,8 +84,6 @@ def main(argv):
         usage()
     if not inputfile.endswith(".dbc"):
         error("wrong input file type (must be .dbc)")
-    if not outputfile:
-        outputfile="{}.json".format(os.path.splitext(os.path.basename(inputfile))[0])
     if not bus:
         bus = "hs"
     if bigE and litE:
@@ -144,10 +142,11 @@ def main(argv):
 
     output_all = data_header 
     output_all.update(messages_dict)
-    with open(outputfile, 'w') as outfile:
+    with open(outputfile, 'w') if outputfile else sys.stdout as outfile:
         json.dump(output_all, outfile, indent=4)
         outfile.write('\n')
-    print("Finished")
+    if outputfile:
+        print("Finished")
 
 if __name__ == '__main__':
     main(sys.argv[1:])
