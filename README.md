@@ -10,7 +10,7 @@ The python3 requirements are:
 The software is based on cantools https://github.com/eerimoq/cantools,
 it converts messages from a dbc file -i (input) and add the dataheader for agl on top of the messages
 
-''python3 dbc2json -i FILENAME.dbc'' 
+''python3 dbc2json.py -i FILENAME.dbc'' 
 will create an output with the number of messages in that dbc file and will create a signals.json
 Launch 'python3 dbc2json -h' to get more details about possibilities.
 
