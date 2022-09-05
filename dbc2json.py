@@ -96,17 +96,28 @@ def main(argv):
     for message in db.messages:
         if prefix:
             message.name = "{}.{}".format(prefix, message.name)
-        message_json = {
-            "name" : formatName(message.name),
-            "bus" : bus,
-            "length": message.length,
-            "is_fd": fd,
-            "is_j1939": j1939,
-            "is_extended": message.is_extended_frame,
-            "byte_frame_is_big_endian": bigE,
-            "bit_position_reversed": rev,
-            "signals" : {}
-        }
+        if bigE or litE or rev:
+            message_json = {
+                "name" : formatName(message.name),
+                "bus" : bus,
+                "length": message.length,
+                "is_fd": fd,
+                "is_j1939": j1939,
+                "is_extended": message.is_extended_frame,
+                "byte_frame_is_big_endian": bigE,
+                "bit_position_reversed": rev,
+                "signals" : {}
+            }
+        else:
+            message_json = {
+                "name" : formatName(message.name),
+                "bus" : bus,
+                "length": message.length,
+                "is_fd": fd,
+                "is_j1939": j1939,
+                "is_extended": message.is_extended_frame,
+                "signals" : {}
+            }
         hex_value = str(hex(message.frame_id))
         messages_dict["messages"][hex_value] = message_json
         signal_dict = messages_dict["messages"][hex_value]["signals"]
@@ -130,8 +141,6 @@ def main(argv):
             if signal.maximum != None:
                 signal_json["max_value"] = signal.maximum
             signal_dict[signal.name] = signal_json
-            if not litE and not bigE and signal.byte_order == "big_endian":
-                message_json["byte_frame_is_big_endian"] = True
 
     output_all = data_header 
     output_all.update(messages_dict)
