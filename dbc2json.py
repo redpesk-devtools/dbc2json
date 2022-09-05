@@ -146,6 +146,7 @@ def main(argv):
     output_all.update(messages_dict)
     with open(outputfile, 'w') as outfile:
         json.dump(output_all, outfile, indent=4)
+        outfile.write('\n')
     print("Finished")
 
 if __name__ == '__main__':
