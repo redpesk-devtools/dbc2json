@@ -138,6 +138,10 @@ def main(argv):
                 signal_json["min_value"] = signal.minimum
             if signal.maximum != None:
                 signal_json["max_value"] = signal.maximum
+            if signal.is_multiplexer:
+                signal_json["multiplexer"] = 'Multiplexor'
+            if signal.multiplexer_ids:
+                signal_json["multiplexer"] = signal.multiplexer_ids[0]
             signal_dict[signal.name] = signal_json
 
     output_all = data_header 
