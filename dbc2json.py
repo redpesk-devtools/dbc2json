@@ -123,8 +123,10 @@ def main(argv):
     
         for signal in signals:
             SName = signal
+            name = "{}.{}".format(formatName(message.name), formatName(signal.name))
             signal_json = {
-                "generic_name": "{}.{}".format(formatName(message.name), formatName(signal.name)),
+                "name": name,
+                "generic_name": formatName(signal.name),
                 "bit_position": signal.start,
                 "bit_size": signal.length,
                 "factor": signal.scale,
