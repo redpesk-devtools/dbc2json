@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 
 # Script to convert a Vector CANoe ".dbc" file in the right json format for Automotive Grade Linux (AGL), these software is a the moment a feasability study
 # created 16. May 2020 by walzert version 0.1 
@@ -42,7 +42,7 @@ def main(argv):
     inputfile = None
     outputfile = None
     prefix = None
-    version = 0.0
+    version = "0.0"
     bus = None
     mode = False
     j1939 = False
@@ -84,8 +84,6 @@ def main(argv):
         usage()
     if not inputfile.endswith(".dbc"):
         error("wrong input file type (must be .dbc)")
-    if not outputfile:
-        outputfile="{}.json".format(os.path.splitext(os.path.basename(inputfile))[0])
     if not bus:
         bus = "hs"
     if bigE and litE:
@@ -96,17 +94,28 @@ def main(argv):
     for message in db.messages:
         if prefix:
             message.name = "{}.{}".format(prefix, message.name)
-        message_json = {
-            "name" : formatName(message.name),
-            "bus" : bus,
-            "length": message.length,
-            "is_fd": fd,
-            "is_j1939": j1939,
-            "is_extended": message.is_extended_frame,
-            "byte_frame_is_big_endian": bigE,
-            "bit_position_reversed": rev,
-            "signals" : {}
-        }
+        if bigE or litE or rev:
+            message_json = {
+                "name" : formatName(message.name),
+                "bus" : bus,
+                "length": message.length,
+                "is_fd": fd,
+                "is_j1939": j1939,
+                "is_extended": message.is_extended_frame,
+                "byte_frame_is_big_endian": bigE,
+                "bit_position_reversed": rev,
+                "signals" : {}
+            }
+        else:
+            message_json = {
+                "name" : formatName(message.name),
+                "bus" : bus,
+                "length": message.length,
+                "is_fd": fd,
+                "is_j1939": j1939,
+                "is_extended": message.is_extended_frame,
+                "signals" : {}
+            }
         hex_value = str(hex(message.frame_id))
         messages_dict["messages"][hex_value] = message_json
         signal_dict = messages_dict["messages"][hex_value]["signals"]
@@ -114,12 +123,15 @@ def main(argv):
     
         for signal in signals:
             SName = signal
+            name = "{}.{}".format(formatName(message.name), formatName(signal.name))
             signal_json = {
-                "generic_name": "{}.{}".format(formatName(message.name), formatName(signal.name)),
+                "name": name,
+                "generic_name": formatName(signal.name),
                 "bit_position": signal.start,
                 "bit_size": signal.length,
                 "factor": signal.scale,
                 "offset": signal.offset,
+                "byte_order": signal.byte_order,
                 "writable": mode
             }
             if signal.unit != None:
@@ -128,15 +140,19 @@ def main(argv):
                 signal_json["min_value"] = signal.minimum
             if signal.maximum != None:
                 signal_json["max_value"] = signal.maximum
+            if signal.is_multiplexer:
+                signal_json["multiplexer"] = 'Multiplexor'
+            if signal.multiplexer_ids:
+                signal_json["multiplexer"] = signal.multiplexer_ids[0]
             signal_dict[signal.name] = signal_json
-            if not litE and not bigE and signal.byte_order == "big_endian":
-                message_json["byte_frame_is_big_endian"] = True
 
     output_all = data_header 
     output_all.update(messages_dict)
-    with open(outputfile, 'w') as outfile:
+    with open(outputfile, 'w') if outputfile else sys.stdout as outfile:
         json.dump(output_all, outfile, indent=4)
-    print("Finished")
+        outfile.write('\n')
+    if outputfile:
+        print("Finished")
 
 if __name__ == '__main__':
-   main(sys.argv[1:])
+    main(sys.argv[1:])
