@@ -116,6 +116,8 @@ def main(argv):
                 "is_extended": message.is_extended_frame,
                 "signals" : {}
             }
+        if message.cycle_time != None and message.cycle_time > 0:
+            message_json["max_frequency"] = 1000.0 / message.cycle_time
         hex_value = str(hex(message.frame_id))
         messages_dict["messages"][hex_value] = message_json
         signal_dict = messages_dict["messages"][hex_value]["signals"]
@@ -134,6 +136,8 @@ def main(argv):
                 "byte_order": signal.byte_order,
                 "writable": mode
             }
+            if message.cycle_time != None and message.cycle_time > 0:
+                signal_json["max_frequency"] = 1000.0 / message.cycle_time
             if signal.unit != None:
                 signal_json["unit"] = signal.unit
             if signal.minimum != None:
